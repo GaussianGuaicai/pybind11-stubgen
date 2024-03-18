@@ -61,21 +61,21 @@ from pybind11_stubgen.writer import Writer
 
 
 class CLIArgs(Namespace):
-    output_dir: str
-    root_suffix: str
-    ignore_invalid_expressions: re.Pattern | None
-    ignore_invalid_identifiers: re.Pattern | None
-    ignore_unresolved_names: re.Pattern | None
-    ignore_all_errors: bool
-    enum_class_locations: list[tuple[re.Pattern, str]]
-    numpy_array_wrap_with_annotated: bool
-    numpy_array_use_type_var: bool
-    numpy_array_remove_parameters: bool
-    print_invalid_expressions_as_is: bool
-    print_safe_value_reprs: re.Pattern | None
-    exit_code: bool
-    dry_run: bool
-    stub_extension: str
+    output_dir: str = './stubs'
+    root_suffix: str = None
+    ignore_invalid_expressions: re.Pattern | None = None
+    ignore_invalid_identifiers: re.Pattern | None = None
+    ignore_unresolved_names: re.Pattern | None = None
+    ignore_all_errors: bool = False
+    enum_class_locations: list[tuple[re.Pattern, str]] = []
+    numpy_array_wrap_with_annotated: bool = False
+    numpy_array_use_type_var: bool = False
+    numpy_array_remove_parameters: bool = False
+    print_invalid_expressions_as_is: bool = False
+    print_safe_value_reprs: re.Pattern | None = None
+    exit_code: bool = True
+    dry_run: bool = False
+    stub_extension: str = "pyi"
     module_name: str
 
 
@@ -300,12 +300,20 @@ def stub_parser_from_args(args: CLIArgs) -> IParser:
     return parser
 
 
-def main():
+def main(**kwargs):
     logging.basicConfig(
         level=logging.INFO,
         format="%(name)s - [%(levelname)7s] %(message)s",
     )
-    args = arg_parser().parse_args(namespace=CLIArgs())
+    args = CLIArgs()
+
+    if len(kwargs)==0:
+        args = arg_parser().parse_args(namespace=CLIArgs())
+    else:
+        args.ignore_all_errors = True
+        args.module_name = kwargs['module_name']
+        args.output_dir = kwargs['output_dir']
+        args.enum_class_locations = kwargs['enum_class_locations']
 
     parser = stub_parser_from_args(args)
     printer = Printer(invalid_expr_as_ellipses=not args.print_invalid_expressions_as_is)

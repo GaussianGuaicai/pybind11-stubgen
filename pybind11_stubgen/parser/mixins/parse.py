@@ -145,6 +145,8 @@ class ParserDispatchMixin(IParser):
         return None
 
     def _is_alias(self, path: QualifiedName, member: Any):
+        if hasattr(member,'__name__') is False:
+            return False
         if (inspect.isroutine(member) or inspect.isclass(member)) and path[
             -1
         ] != member.__name__:
