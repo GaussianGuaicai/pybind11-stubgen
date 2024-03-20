@@ -45,6 +45,7 @@ from pybind11_stubgen.parser.mixins.fix import (
     FixScipyTypeArguments,
     FixTypingTypeNames,
     FixValueReprRandomAddress,
+    FixHoudiniTyping,
     OverridePrintSafeValues,
     RemoveSelfAnnotation,
     ReplaceReadWritePropertyWithField,
@@ -262,6 +263,7 @@ def stub_parser_from_args(args: CLIArgs) -> IParser:
         FixMissingFixedSizeImport,
         FixMissingEnumMembersAnnotation,
         OverridePrintSafeValues,
+        FixHoudiniTyping,
         *numpy_fixes,  # type: ignore[misc]
         FixNumpyDtype,
         FixNumpyArrayFlags,

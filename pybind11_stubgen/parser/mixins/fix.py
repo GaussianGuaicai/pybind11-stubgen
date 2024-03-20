@@ -1043,3 +1043,36 @@ class RewritePybind11EnumValueRepr(IParser):
                 + "\n".join(f" - {c}" for c in self._unknown_enum_classes)
             )
         super().finalize()
+
+class FixHoudiniTyping(IParser):
+    type_map = {
+        'WorkItemSerialization':'WorkItem.Serialization',
+        'PortType':'portType',
+        'WorkItemState':'workItemState',
+        'WorkItemCookType':'workItemCookType',
+        'WorkItemLogType':'workItemLogType'
+    }
+
+
+    def parse_annotation_str(
+        self, annotation_str: str
+    ) -> ResolvedType | InvalidExpression | Value:
+        result = super().parse_annotation_str(annotation_str)
+
+        if not isinstance(result, ResolvedType):
+            return result
+        
+        # remove PDG type name prefix
+        result_first_str = result.name[0]
+        if result_first_str.startswith('PDG_'):
+            type_str = result_first_str.removeprefix('PDG_')
+            # TODO: better subclass parsing
+            if type_str in self.type_map.keys():
+                type_str = self.type_map[type_str]
+            result.name = QualifiedName.from_str(type_str)
+        if result_first_str in ('UT_Array','UT_Set'):
+            result.name = QualifiedName.from_str('list')
+        if result_first_str.startswith('PYPDG_'):
+            result.name = QualifiedName.from_str('Py'+result_first_str.removeprefix('PYPDG_'))
+
+        return result
